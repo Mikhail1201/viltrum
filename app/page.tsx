@@ -1,65 +1,188 @@
-import Image from "next/image";
+// app/dashboard/page.tsx
 
-export default function Home() {
+"use client";
+
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import PageHeader from "@/components/layout/PageHeader";
+import Card from "@/components/ui/Card";
+import StatusBadge from "@/components/ui/StatusBadge";
+
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  ClipboardCheck,
+} from "lucide-react";
+
+const stats = [
+  {
+    title: "Estudiantes",
+    value: 120,
+    description: "Información general del módulo",
+    icon: Users,
+  },
+  {
+    title: "Docentes",
+    value: 35,
+    description: "Información general del módulo",
+    icon: GraduationCap,
+  },
+  {
+    title: "Materias",
+    value: 48,
+    description: "Información general del módulo",
+    icon: BookOpen,
+  },
+  {
+    title: "Asistencias",
+    value: 932,
+    description: "Información general del módulo",
+    icon: ClipboardCheck,
+  },
+];
+
+const recentActivity = [
+  {
+    usuario: "Juan Pérez",
+    accion: "Registró asistencia",
+    fecha: "22/05/2026",
+    estado: "Activo",
+  },
+  {
+    usuario: "Laura Gómez",
+    accion: "Actualizó horario",
+    fecha: "22/05/2026",
+    estado: "Activo",
+  },
+  {
+    usuario: "Miguel Alzate",
+    accion: "Creó una materia",
+    fecha: "21/05/2026",
+    estado: "Inactivo",
+  },
+  {
+    usuario: "Carlos Ruiz",
+    accion: "Subió calificaciones",
+    fecha: "21/05/2026",
+    estado: "Egresado",
+  },
+];
+
+export default function DashboardPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <DashboardLayout>
+      {/* HEADER */}
+      <PageHeader
+        title="Bienvenido de nuevo"
+        subtitle="Panel principal del sistema académico"
+        actions={
+          <div className="rounded-2xl bg-cyan-100 px-6 py-4">
+            <p className="font-semibold text-cyan-700">
+              Miguel Alzate
+            </p>
+          </div>
+        }
+      />
+
+      {/* STATS */}
+      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+
+          return (
+            <Card key={stat.title}>
+              <div className="rounded-2xl bg-cyan-100 p-4 w-fit">
+                <Icon className="text-cyan-600" size={28} />
+              </div>
+
+              <h2 className="mt-8 text-3xl font-bold text-slate-800">
+                {stat.title}
+              </h2>
+
+              <p className="mt-3 text-slate-500">
+                {stat.description}
+              </p>
+
+              <h3 className="mt-8 text-5xl font-bold text-cyan-600">
+                {stat.value}
+              </h3>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* ACTIVIDAD RECIENTE */}
+      <div className="mt-8">
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-4xl font-bold text-slate-800">
+                Actividad reciente
+              </h2>
+
+              <p className="mt-2 text-slate-500">
+                Últimos movimientos dentro del sistema
+              </p>
+            </div>
+
+            <button className="rounded-2xl bg-cyan-500 px-6 py-4 font-semibold text-white transition-all hover:bg-cyan-400">
+              Ver más
+            </button>
+          </div>
+
+          {/* TABLE */}
+          <div className="mt-8 overflow-hidden rounded-3xl border border-slate-100">
+            <table className="w-full">
+              <thead className="bg-cyan-50">
+                <tr>
+                  <th className="px-6 py-5 text-left text-slate-700">
+                    Usuario
+                  </th>
+
+                  <th className="px-6 py-5 text-left text-slate-700">
+                    Acción
+                  </th>
+
+                  <th className="px-6 py-5 text-left text-slate-700">
+                    Fecha
+                  </th>
+
+                  <th className="px-6 py-5 text-left text-slate-700">
+                    Estado
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="bg-white/30">
+                {recentActivity.map((activity, index) => (
+                  <tr
+                    key={index}
+                    className="border-t border-slate-100"
+                  >
+                    <td className="px-6 py-5 font-medium text-slate-800">
+                      {activity.usuario}
+                    </td>
+
+                    <td className="px-6 py-5 text-slate-600">
+                      {activity.accion}
+                    </td>
+
+                    <td className="px-6 py-5 text-slate-600">
+                      {activity.fecha}
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <StatusBadge
+                        status={activity.estado}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }
