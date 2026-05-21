@@ -13,7 +13,10 @@ import {
   ClipboardCheck,
   FileText,
   GraduationCap,
-  Settings,
+  DoorOpen,
+  School,
+  DoorClosed,
+  ClipboardList,
 } from "lucide-react";
 
 type SidebarProps = {
@@ -24,115 +27,159 @@ type SidebarProps = {
   ESTRUCTURA DE ACCESOS
 
   ADMIN:
-  - ve TODO
+  - TODO
 
   COORDINADOR:
-  - ve SUS páginas
-  - ve páginas DOCENTE
-  - ve páginas ESTUDIANTE
+  - SUS PÁGINAS
+  - DOCENTE
+  - ESTUDIANTE
 
   DOCENTE:
-  - solo páginas DOCENTE
+  - DOCENTE
 
   ESTUDIANTE:
-  - solo páginas ESTUDIANTE
+  - ESTUDIANTE
 */
 
 const adminMenu = [
-  // GENERALES
   {
     name: "Dashboard",
     icon: LayoutDashboard,
     href: "/",
   },
 
-  // ADMIN
   {
     name: "Usuarios",
     icon: Users,
     href: "/usuarios",
   },
+
   {
     name: "Facultades",
     icon: GraduationCap,
     href: "/facultades",
   },
+
+  {
+    name: "Programas",
+    icon: School,
+    href: "/programas",
+  },
+
+  {
+    name: "Aulas",
+    icon: DoorClosed,
+    href: "/aulas",
+  },
+
   {
     name: "Reportes",
     icon: FileText,
     href: "/reportes",
   },
 
-  // COORDINADOR
   {
     name: "Microcurrículos",
     icon: FileText,
     href: "/microcurriculos",
   },
+
   {
     name: "Carga Académica",
     icon: BookOpen,
-    href: "/carga",
+    href: "/carga-academica",
   },
 
-  // DOCENTE + ESTUDIANTE
   {
     name: "Materias",
     icon: BookOpen,
     href: "/materias",
   },
+
   {
     name: "Horarios",
     icon: Calendar,
     href: "/horarios",
   },
+
   {
     name: "Asistencias",
     icon: ClipboardCheck,
     href: "/asistencias",
   },
+
   {
-    name: "Configuración",
-    icon: Settings,
-    href: "/configuracion",
+    name: "Calificaciones",
+    icon: ClipboardList,
+    href: "/calificaciones",
+  },
+
+  {
+    name: "Logout",
+    icon: DoorOpen,
+    href: "/login",
   },
 ];
 
 const coordinadorMenu = [
-  // GENERALES
   {
     name: "Dashboard",
     icon: LayoutDashboard,
     href: "/",
   },
 
-  // COORDINADOR
+  {
+    name: "Programas",
+    icon: School,
+    href: "/programas",
+  },
+
+  {
+    name: "Aulas",
+    icon: DoorClosed,
+    href: "/aulas",
+  },
+
   {
     name: "Microcurrículos",
     icon: FileText,
     href: "/microcurriculos",
   },
+
   {
     name: "Carga Académica",
     icon: BookOpen,
-    href: "/carga",
+    href: "/carga-academica",
   },
 
-  // DOCENTE + ESTUDIANTE
   {
     name: "Materias",
     icon: BookOpen,
     href: "/materias",
   },
+
   {
     name: "Horarios",
     icon: Calendar,
     href: "/horarios",
   },
+
   {
     name: "Asistencias",
     icon: ClipboardCheck,
     href: "/asistencias",
+  },
+
+  {
+    name: "Calificaciones",
+    icon: ClipboardList,
+    href: "/calificaciones",
+  },
+
+  {
+    name: "Logout",
+    icon: DoorOpen,
+    href: "/login",
   },
 ];
 
@@ -142,20 +189,35 @@ const docenteMenu = [
     icon: LayoutDashboard,
     href: "/",
   },
+
   {
     name: "Mis Materias",
     icon: BookOpen,
     href: "/materias",
   },
+
   {
     name: "Horarios",
     icon: Calendar,
     href: "/horarios",
   },
+
   {
     name: "Asistencias",
     icon: ClipboardCheck,
     href: "/asistencias",
+  },
+
+  {
+    name: "Calificaciones",
+    icon: ClipboardList,
+    href: "/calificaciones",
+  },
+
+  {
+    name: "Logout",
+    icon: DoorOpen,
+    href: "/login",
   },
 ];
 
@@ -165,20 +227,35 @@ const estudianteMenu = [
     icon: LayoutDashboard,
     href: "/",
   },
+
   {
     name: "Mi Horario",
     icon: Calendar,
     href: "/horarios",
   },
+
   {
     name: "Mis Materias",
     icon: BookOpen,
     href: "/materias",
   },
+
   {
     name: "Asistencias",
     icon: ClipboardCheck,
     href: "/asistencias",
+  },
+
+  {
+    name: "Calificaciones",
+    icon: ClipboardList,
+    href: "/calificaciones",
+  },
+
+  {
+    name: "Logout",
+    icon: DoorOpen,
+    href: "/login",
   },
 ];
 
@@ -195,15 +272,19 @@ export default function Sidebar({
   const pathname = usePathname();
 
   const menu =
-    menuByRole[role as keyof typeof menuByRole];
+    menuByRole[
+      role as keyof typeof menuByRole
+    ] || [];
 
   return (
     <aside
       className="
+        fixed
         flex
-        min-h-screen
+        h-full
         w-[290px]
         flex-col
+        overflow-y-auto
         border-r
         border-white/20
         bg-gradient-to-b
@@ -212,6 +293,10 @@ export default function Sidebar({
         to-blue-600
         p-5
         shadow-2xl
+
+        [scrollbar-width:none]
+        [-ms-overflow-style:none]
+        [&::-webkit-scrollbar]:hidden
       "
     >
       {/* LOGO */}
@@ -258,14 +343,13 @@ export default function Sidebar({
       </div>
 
       {/* MENU */}
-      <nav className="flex flex-col gap-3">
+      <nav className="flex flex-col gap-3 pb-10">
         {menu.map((item) => {
           const Icon = item.icon;
 
           const isActive =
             pathname === item.href;
 
-          // BOTÓN ACTIVO
           if (isActive) {
             return (
               <div
@@ -302,7 +386,6 @@ export default function Sidebar({
             );
           }
 
-          // BOTÓN NORMAL
           return (
             <Link
               key={item.name}
