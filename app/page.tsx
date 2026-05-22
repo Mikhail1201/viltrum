@@ -3,6 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PageHeader from "@/components/layout/PageHeader";
@@ -29,16 +30,26 @@ type StatType = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [role, setRole] = useState("");
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     const savedRole =
       localStorage.getItem("role");
 
-    if (savedRole) {
-      setRole(savedRole);
+    if (!savedRole) {
+      router.push("/login");
+      return;
     }
-  }, []);
+
+    setRole(savedRole);
+    setAuthorized(true);
+  }, [router]);
+
+  if (!authorized) {
+    return null;
+  }
 
   // =========================
   // STATS POR ROL
