@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PageHeader from "@/components/layout/PageHeader";
@@ -48,8 +48,6 @@ import {
   - no accede
 */
 
-const currentUserRole: "admin" | "coordinador" | "docente" = "coordinador";
-
 const allowedRoles = [
   "admin",
   "coordinador",
@@ -84,6 +82,9 @@ const microcurriculos = [
 ];
 
 export default function MicrocurriculosPage() {
+  const [currentUserRole, setCurrentUserRole] =
+    useState("");
+
   const [showCreateModal, setShowCreateModal] =
     useState(false);
 
@@ -93,7 +94,18 @@ export default function MicrocurriculosPage() {
   const [showViewModal, setShowViewModal] =
     useState(false);
 
-  if (!allowedRoles.includes(currentUserRole)) {
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+
+    if (role) {
+      setCurrentUserRole(role);
+    }
+  }, []);
+
+  if (
+    currentUserRole &&
+    !allowedRoles.includes(currentUserRole)
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
         <div className="rounded-[32px] bg-white p-12 shadow-2xl">
@@ -122,7 +134,9 @@ export default function MicrocurriculosPage() {
         title="Microcurrículos"
         subtitle="Gestión académica de contenidos curriculares"
         actions={
-          currentUserRole !== "docente" && (
+          (currentUserRole === "admin" ||
+            currentUserRole ===
+              "coordinador") && (
             <Button
               onClick={() =>
                 setShowCreateModal(true)
@@ -138,75 +152,79 @@ export default function MicrocurriculosPage() {
       />
 
       {/* STATS */}
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card>
-          <div className="rounded-2xl bg-cyan-100 p-4 w-fit">
-            <FileText
-              className="text-cyan-600"
-              size={28}
-            />
-          </div>
+      {(currentUserRole === "admin" ||
+        currentUserRole ===
+          "coordinador") && (
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-4">
+          <Card>
+            <div className="rounded-2xl bg-cyan-100 p-4 w-fit">
+              <FileText
+                className="text-cyan-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            86
-          </h2>
+            <h2 className="mt-6 text-5xl font-bold text-slate-800">
+              86
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Microcurrículos registrados
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Microcurrículos registrados
+            </p>
+          </Card>
 
-        <Card>
-          <div className="rounded-2xl bg-violet-100 p-4 w-fit">
-            <BookOpen
-              className="text-violet-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="rounded-2xl bg-violet-100 p-4 w-fit">
+              <BookOpen
+                className="text-violet-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            214
-          </h2>
+            <h2 className="mt-6 text-5xl font-bold text-slate-800">
+              214
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Materias activas
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Materias activas
+            </p>
+          </Card>
 
-        <Card>
-          <div className="rounded-2xl bg-emerald-100 p-4 w-fit">
-            <GraduationCap
-              className="text-emerald-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="rounded-2xl bg-emerald-100 p-4 w-fit">
+              <GraduationCap
+                className="text-emerald-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            12
-          </h2>
+            <h2 className="mt-6 text-5xl font-bold text-slate-800">
+              12
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Facultades vinculadas
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Facultades vinculadas
+            </p>
+          </Card>
 
-        <Card>
-          <div className="rounded-2xl bg-orange-100 p-4 w-fit">
-            <Clock3
-              className="text-orange-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="rounded-2xl bg-orange-100 p-4 w-fit">
+              <Clock3
+                className="text-orange-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            48h
-          </h2>
+            <h2 className="mt-6 text-5xl font-bold text-slate-800">
+              48h
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Promedio semanal
-          </p>
-        </Card>
-      </div>
+            <p className="mt-2 text-slate-500">
+              Promedio semanal
+            </p>
+          </Card>
+        </div>
+      )}
 
       {/* SEARCH */}
       <div className="mt-8">
@@ -257,8 +275,8 @@ export default function MicrocurriculosPage() {
           </div>
 
           {/* TABLE */}
-          <div className="overflow-hidden rounded-3xl border border-slate-100">
-            <table className="w-[80%]">
+          <div className="overflow-x-auto rounded-3xl border border-slate-100">
+            <table className="w-full min-w-[1100px]">
               <thead className="bg-cyan-50">
                 <tr>
                   <th className="px-6 py-5 text-left text-slate-700">
@@ -287,7 +305,7 @@ export default function MicrocurriculosPage() {
                 </tr>
               </thead>
 
-              <tbody className="bg-white/30 h-[80%]">
+              <tbody className="bg-white/30">
                 {microcurriculos.map((micro) => (
                   <tr
                     key={micro.id}
@@ -350,9 +368,11 @@ export default function MicrocurriculosPage() {
                           Ver
                         </button>
 
-                        {/* EDITAR */}
-                        {currentUserRole !==
-                          "docente" && (
+                        {/* EDITAR SOLO ADMIN Y COORDINADOR */}
+                        {(currentUserRole ===
+                          "admin" ||
+                          currentUserRole ===
+                            "coordinador") && (
                           <button
                             onClick={() =>
                               setShowEditModal(
@@ -376,6 +396,25 @@ export default function MicrocurriculosPage() {
                             Editar
                           </button>
                         )}
+
+                        {/* DESCARGAR */}
+                        <button
+                          className="
+                            flex
+                            items-center
+                            gap-2
+                            rounded-2xl
+                            bg-emerald-500
+                            px-4
+                            py-3
+                            text-white
+                            transition-all
+                            hover:bg-emerald-400
+                          "
+                        >
+                          <Download size={18} />
+                          Descargar
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -447,7 +486,12 @@ export default function MicrocurriculosPage() {
           </form>
 
           <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowCreateModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -518,7 +562,12 @@ export default function MicrocurriculosPage() {
           </form>
 
           <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowEditModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -601,16 +650,22 @@ export default function MicrocurriculosPage() {
 
                 <p className="mt-4 leading-8 text-slate-700">
                   Introducción a fundamentos de
-                  programación, algoritmos, estructuras
-                  básicas y resolución de problemas
-                  utilizando lógica computacional.
+                  programación, algoritmos,
+                  estructuras básicas y resolución
+                  de problemas utilizando lógica
+                  computacional.
                 </p>
               </Card>
             </div>
           </div>
 
           <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowViewModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowViewModal(false)
+              }
+            >
               Cerrar
             </Button>
 

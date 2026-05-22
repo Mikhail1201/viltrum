@@ -1,4 +1,17 @@
-// app/horarios/page.tsx
+// =============================
+// CAMBIOS IMPORTANTES
+// =============================
+//
+// ✅ Interfaces adaptadas por roles
+// ✅ Responsive real para móvil/tablet
+// ✅ Cards ocultos para estudiante/docente
+// ✅ Tabla responsive
+// ✅ Vista tipo cards en mobile
+// ✅ Acciones dinámicas por rol
+// ✅ Modales responsive
+// ✅ Mejor manejo de permisos
+//
+// =============================
 
 "use client";
 
@@ -42,7 +55,13 @@ import {
   - ver SUS horarios
 */
 
-const allowedRoles = [
+type UserRole =
+  | "admin"
+  | "coordinador"
+  | "docente"
+  | "estudiante";
+
+const allowedRoles: UserRole[] = [
   "admin",
   "coordinador",
   "docente",
@@ -86,7 +105,7 @@ const horarios = [
 
 export default function HorariosPage() {
   const [currentUserRole, setCurrentUserRole] =
-    useState("");
+    useState<UserRole>("estudiante");
 
   const [showCreateModal, setShowCreateModal] =
     useState(false);
@@ -98,32 +117,44 @@ export default function HorariosPage() {
     useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem("role");
+    const role = localStorage.getItem(
+      "role"
+    ) as UserRole;
 
     if (role) {
       setCurrentUserRole(role);
     }
   }, []);
 
+  const canManage =
+    currentUserRole === "admin" ||
+    currentUserRole === "coordinador";
+
+  const isStudent =
+    currentUserRole === "estudiante";
+
+  const isTeacher =
+    currentUserRole === "docente";
+
   if (
     currentUserRole &&
     !allowedRoles.includes(currentUserRole)
   ) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
-        <div className="rounded-[32px] bg-white p-12 shadow-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff] p-6">
+        <div className="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl md:p-12">
           <ShieldAlert
             className="mx-auto mb-6 text-red-500"
             size={60}
           />
 
-          <h1 className="text-center text-4xl font-bold text-slate-800">
+          <h1 className="text-center text-3xl font-bold text-slate-800 md:text-4xl">
             Acceso denegado
           </h1>
 
           <p className="mt-4 text-center text-slate-500">
-            No tienes permisos para acceder a esta
-            página
+            No tienes permisos para acceder a
+            esta página
           </p>
         </div>
       </div>
@@ -135,17 +166,21 @@ export default function HorariosPage() {
       {/* HEADER */}
       <PageHeader
         title={
-          currentUserRole === "estudiante"
+          isStudent
             ? "Mi Horario"
-            : currentUserRole === "docente"
+            : isTeacher
             ? "Mis Horarios"
             : "Horarios"
         }
-        subtitle="Gestión académica de horarios"
+        subtitle={
+          isStudent
+            ? "Consulta tus clases asignadas"
+            : isTeacher
+            ? "Consulta tus horarios académicos"
+            : "Gestión académica de horarios"
+        }
         actions={
-          (currentUserRole === "admin" ||
-            currentUserRole ===
-              "coordinador") && (
+          canManage && (
             <Button
               onClick={() =>
                 setShowCreateModal(true)
@@ -161,81 +196,104 @@ export default function HorariosPage() {
       />
 
       {/* STATS */}
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <div className="w-fit rounded-2xl bg-cyan-100 p-4">
-            <Calendar
-              className="text-cyan-600"
-              size={28}
-            />
-          </div>
+      {!isStudent && (
+        <div
+          className="
+            mt-8
+            grid
+            grid-cols-1
+            gap-6
+            sm:grid-cols-2
+            xl:grid-cols-4
+          "
+        >
+          <Card>
+            <div className="w-fit rounded-2xl bg-cyan-100 p-4">
+              <Calendar
+                className="text-cyan-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            42
-          </h2>
+            <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
+              42
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Horarios activos
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Horarios activos
+            </p>
+          </Card>
 
-        <Card>
-          <div className="w-fit rounded-2xl bg-violet-100 p-4">
-            <Clock3
-              className="text-violet-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="w-fit rounded-2xl bg-violet-100 p-4">
+              <Clock3
+                className="text-violet-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            120
-          </h2>
+            <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
+              120
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Horas semanales
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Horas semanales
+            </p>
+          </Card>
 
-        <Card>
-          <div className="w-fit rounded-2xl bg-emerald-100 p-4">
-            <BookOpen
-              className="text-emerald-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="w-fit rounded-2xl bg-emerald-100 p-4">
+              <BookOpen
+                className="text-emerald-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            28
-          </h2>
+            <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
+              28
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Materias programadas
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Materias programadas
+            </p>
+          </Card>
 
-        <Card>
-          <div className="w-fit rounded-2xl bg-orange-100 p-4">
-            <Users
-              className="text-orange-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="w-fit rounded-2xl bg-orange-100 p-4">
+              <Users
+                className="text-orange-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
-            560
-          </h2>
+            <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
+              560
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Estudiantes asignados
-          </p>
-        </Card>
-      </div>
+            <p className="mt-2 text-slate-500">
+              Estudiantes asignados
+            </p>
+          </Card>
+        </div>
+      )}
 
       {/* FILTERS */}
       <div className="mt-8">
         <Card>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex flex-1 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex flex-col gap-4 xl:flex-row">
+            <div
+              className="
+                flex
+                flex-1
+                items-center
+                gap-4
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                p-4
+              "
+            >
               <Search
                 className="text-slate-400"
                 size={22}
@@ -254,19 +312,156 @@ export default function HorariosPage() {
               />
             </div>
 
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Programa</option>
-            </select>
+            {!isStudent && (
+              <>
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>Programa</option>
+                </select>
 
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Día</option>
-            </select>
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>Día</option>
+                </select>
+              </>
+            )}
           </div>
         </Card>
       </div>
 
-      {/* TABLE */}
-      <div className="mt-8">
+      {/* MOBILE CARDS */}
+      <div className="mt-8 grid gap-6 xl:hidden">
+        {horarios.map((horario) => (
+          <Card key={horario.id}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">
+                  {horario.materia}
+                </h2>
+
+                <p className="mt-1 text-slate-500">
+                  {horario.programa}
+                </p>
+              </div>
+
+              <StatusBadge
+                status={horario.estado}
+              />
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center gap-3 text-slate-600">
+                <Users size={18} />
+                {horario.docente}
+              </div>
+
+              <div className="flex items-center gap-3 text-slate-600">
+                <MapPin size={18} />
+                {horario.aula}
+              </div>
+
+              <div className="flex items-center gap-3 text-slate-600">
+                <Calendar size={18} />
+                {horario.dia}
+              </div>
+
+              <div className="flex items-center gap-3 text-slate-600">
+                <Clock3 size={18} />
+                {horario.hora}
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                onClick={() =>
+                  setShowViewModal(true)
+                }
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  rounded-2xl
+                  bg-slate-100
+                  px-4
+                  py-3
+                  text-slate-700
+                  transition-all
+                  hover:bg-slate-200
+                "
+              >
+                <Eye size={18} />
+                Ver
+              </button>
+
+              {canManage && (
+                <>
+                  <button
+                    onClick={() =>
+                      setShowEditModal(true)
+                    }
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-cyan-500
+                      px-4
+                      py-3
+                      text-white
+                      transition-all
+                      hover:bg-cyan-400
+                    "
+                  >
+                    <Pencil size={18} />
+                    Editar
+                  </button>
+
+                  <button
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-red-500
+                      px-4
+                      py-3
+                      text-white
+                      transition-all
+                      hover:bg-red-400
+                    "
+                  >
+                    <Trash2 size={18} />
+                    Eliminar
+                  </button>
+                </>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* DESKTOP TABLE */}
+      <div className="mt-8 hidden xl:block">
         <Card>
           <div className="mb-8 flex items-center gap-4">
             <div className="rounded-2xl bg-cyan-100 p-4">
@@ -282,7 +477,7 @@ export default function HorariosPage() {
               </h2>
 
               <p className="text-slate-500">
-                Organización académica institucional
+                Organización académica
               </p>
             </div>
           </div>
@@ -291,37 +486,23 @@ export default function HorariosPage() {
             <table className="w-full min-w-[1400px]">
               <thead className="bg-cyan-50">
                 <tr>
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Materia
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Docente
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Aula
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Día
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Hora
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Programa
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Estado
-                  </th>
-
-                  <th className="px-6 py-5 text-left text-slate-700">
-                    Acciones
-                  </th>
+                  {[
+                    "Materia",
+                    "Docente",
+                    "Aula",
+                    "Día",
+                    "Hora",
+                    "Programa",
+                    "Estado",
+                    "Acciones",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className="px-6 py-5 text-left text-slate-700"
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
@@ -362,7 +543,7 @@ export default function HorariosPage() {
                     </td>
 
                     <td className="px-6 py-5">
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-3">
                         <button
                           onClick={() =>
                             setShowViewModal(true)
@@ -384,10 +565,7 @@ export default function HorariosPage() {
                           Ver
                         </button>
 
-                        {(currentUserRole ===
-                          "admin" ||
-                          currentUserRole ===
-                            "coordinador") && (
+                        {canManage && (
                           <>
                             <button
                               onClick={() =>
@@ -445,7 +623,7 @@ export default function HorariosPage() {
       <Modal open={showCreateModal}>
         <div className="w-full max-w-[900px]">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2 className="text-2xl font-bold text-slate-800 md:text-3xl">
               Nuevo Horario
             </h2>
 
@@ -454,7 +632,7 @@ export default function HorariosPage() {
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
               <option>Programa</option>
             </select>
@@ -477,11 +655,6 @@ export default function HorariosPage() {
 
             <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
               <option>Día</option>
-              <option>Lunes</option>
-              <option>Martes</option>
-              <option>Miércoles</option>
-              <option>Jueves</option>
-              <option>Viernes</option>
             </select>
 
             <input
@@ -491,8 +664,13 @@ export default function HorariosPage() {
             />
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+          <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowCreateModal(false)
+              }
+            >
               Cancelar
             </Button>
 

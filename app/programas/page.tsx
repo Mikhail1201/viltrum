@@ -30,7 +30,7 @@ import {
   ROLES
 
   ADMIN:
-  - TODO
+  - todo
 
   COORDINADOR:
   - crear
@@ -38,16 +38,11 @@ import {
   - visualizar
 
   DOCENTE:
-  - visualizar programas
+  - solo visualizar programas
 
   ESTUDIANTE:
-  - visualizar SU programa
+  - solo visualizar SU programa
 */
-
-const allowedRoles = [
-  "admin",
-  "coordinador",
-];
 
 const programas = [
   {
@@ -102,30 +97,13 @@ export default function ProgramasPage() {
     }
   }, []);
 
-  if (
-    currentUserRole &&
-    !allowedRoles.includes(currentUserRole)
-  ) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
-        <div className="rounded-[32px] bg-white p-12 shadow-2xl">
-          <ShieldAlert
-            className="mx-auto mb-6 text-red-500"
-            size={60}
-          />
+  // TODOS PUEDEN ENTRAR
+  // ESTUDIANTE SOLO VE SU PROGRAMA
 
-          <h1 className="text-center text-4xl font-bold text-slate-800">
-            Acceso denegado
-          </h1>
-
-          <p className="mt-4 text-center text-slate-500">
-            No tienes permisos para acceder a esta
-            página
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const filteredPrograms =
+    currentUserRole === "estudiante"
+      ? [programas[0]]
+      : programas;
 
   return (
     <DashboardLayout>
@@ -136,7 +114,11 @@ export default function ProgramasPage() {
             ? "Mi Programa"
             : "Programas Académicos"
         }
-        subtitle="Gestión institucional de programas"
+        subtitle={
+          currentUserRole === "estudiante"
+            ? "Información de tu programa académico"
+            : "Gestión institucional de programas"
+        }
         actions={
           (currentUserRole === "admin" ||
             currentUserRole ===
@@ -156,7 +138,16 @@ export default function ProgramasPage() {
       />
 
       {/* STATS */}
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div
+        className="
+          mt-8
+          grid
+          grid-cols-1
+          gap-6
+          sm:grid-cols-2
+          xl:grid-cols-4
+        "
+      >
         <Card>
           <div className="w-fit rounded-2xl bg-cyan-100 p-4">
             <GraduationCap
@@ -165,11 +156,11 @@ export default function ProgramasPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-3xl font-bold text-slate-800 sm:text-5xl">
             24
           </h2>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
             Programas activos
           </p>
         </Card>
@@ -182,11 +173,11 @@ export default function ProgramasPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-3xl font-bold text-slate-800 sm:text-5xl">
             8
           </h2>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
             Facultades
           </p>
         </Card>
@@ -199,11 +190,11 @@ export default function ProgramasPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-3xl font-bold text-slate-800 sm:text-5xl">
             5.2K
           </h2>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
             Estudiantes
           </p>
         </Card>
@@ -216,55 +207,94 @@ export default function ProgramasPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-3xl font-bold text-slate-800 sm:text-5xl">
             310
           </h2>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
             Materias asociadas
           </p>
         </Card>
       </div>
 
       {/* SEARCH */}
-      <div className="mt-8">
-        <Card>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex flex-1 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
-              <Search
-                className="text-slate-400"
-                size={22}
-              />
-
-              <input
-                type="text"
-                placeholder="Buscar programa..."
+      {currentUserRole !== "estudiante" && (
+        <div className="mt-8">
+          <Card>
+            <div className="flex flex-col gap-4 xl:flex-row">
+              <div
                 className="
-                  w-full
-                  bg-transparent
-                  text-slate-700
-                  outline-none
-                  placeholder:text-slate-400
+                  flex
+                  flex-1
+                  items-center
+                  gap-4
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-white
+                  p-4
                 "
-              />
+              >
+                <Search
+                  className="text-slate-400"
+                  size={22}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Buscar programa..."
+                  className="
+                    w-full
+                    bg-transparent
+                    text-slate-700
+                    outline-none
+                    placeholder:text-slate-400
+                  "
+                />
+              </div>
+
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>Facultad</option>
+                </select>
+
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>Estado</option>
+                </select>
+              </div>
             </div>
-
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Facultad</option>
-            </select>
-
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Estado</option>
-            </select>
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      )}
 
       {/* TABLE */}
       <div className="mt-8">
         <Card>
-          <div className="mb-8 flex items-center gap-4">
-            <div className="rounded-2xl bg-cyan-100 p-4">
+          {/* TITLE */}
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="rounded-2xl bg-cyan-100 p-4 w-fit">
               <GraduationCap
                 className="text-cyan-600"
                 size={30}
@@ -272,17 +302,153 @@ export default function ProgramasPage() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">
-                Programas Académicos
+              <h2 className="text-2xl font-bold text-slate-800 sm:text-3xl">
+                {currentUserRole ===
+                "estudiante"
+                  ? "Mi Programa"
+                  : "Programas Académicos"}
               </h2>
 
-              <p className="text-slate-500">
+              <p className="text-sm text-slate-500 sm:text-base">
                 Gestión institucional universitaria
               </p>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-100">
+          {/* MOBILE CARDS */}
+          <div className="grid grid-cols-1 gap-5 xl:hidden">
+            {filteredPrograms.map((programa) => (
+              <div
+                key={programa.id}
+                className="
+                  rounded-3xl
+                  border
+                  border-slate-100
+                  bg-white/70
+                  p-5
+                "
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800">
+                      {programa.nombre}
+                    </h3>
+
+                    <p className="mt-1 text-slate-500">
+                      {programa.codigo}
+                    </p>
+                  </div>
+
+                  <StatusBadge
+                    status={programa.estado}
+                  />
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <div className="flex items-center gap-3 text-slate-600">
+                    <Building2 size={18} />
+                    {programa.facultad}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-slate-600">
+                    <Clock3 size={18} />
+                    {programa.duracion}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-slate-600">
+                    <Users size={18} />
+                    {programa.estudiantes} estudiantes
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    onClick={() =>
+                      setShowViewModal(true)
+                    }
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-slate-100
+                      px-4
+                      py-3
+                      text-sm
+                      text-slate-700
+                      transition-all
+                      hover:bg-slate-200
+                    "
+                  >
+                    <Eye size={16} />
+                    Ver
+                  </button>
+
+                  {(currentUserRole === "admin" ||
+                    currentUserRole ===
+                      "coordinador") && (
+                    <>
+                      <button
+                        onClick={() =>
+                          setShowEditModal(true)
+                        }
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-2xl
+                          bg-cyan-500
+                          px-4
+                          py-3
+                          text-sm
+                          text-white
+                          transition-all
+                          hover:bg-cyan-400
+                        "
+                      >
+                        <Pencil size={16} />
+                        Editar
+                      </button>
+
+                      {currentUserRole ===
+                        "admin" && (
+                        <button
+                          className="
+                            flex
+                            items-center
+                            gap-2
+                            rounded-2xl
+                            bg-red-500
+                            px-4
+                            py-3
+                            text-sm
+                            text-white
+                            transition-all
+                            hover:bg-red-400
+                          "
+                        >
+                          <Trash2 size={16} />
+                          Eliminar
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* DESKTOP TABLE */}
+          <div
+            className="
+              hidden
+              overflow-x-auto
+              rounded-3xl
+              border
+              border-slate-100
+              xl:block
+            "
+          >
             <table className="w-full min-w-[1200px]">
               <thead className="bg-cyan-50">
                 <tr>
@@ -317,7 +483,7 @@ export default function ProgramasPage() {
               </thead>
 
               <tbody className="bg-white/40">
-                {programas.map((programa) => (
+                {filteredPrograms.map((programa) => (
                   <tr
                     key={programa.id}
                     className="border-t border-slate-100"
@@ -399,23 +565,26 @@ export default function ProgramasPage() {
                               Editar
                             </button>
 
-                            <button
-                              className="
-                                flex
-                                items-center
-                                gap-2
-                                rounded-2xl
-                                bg-red-500
-                                px-4
-                                py-3
-                                text-white
-                                transition-all
-                                hover:bg-red-400
-                              "
-                            >
-                              <Trash2 size={18} />
-                              Eliminar
-                            </button>
+                            {currentUserRole ===
+                              "admin" && (
+                              <button
+                                className="
+                                  flex
+                                  items-center
+                                  gap-2
+                                  rounded-2xl
+                                  bg-red-500
+                                  px-4
+                                  py-3
+                                  text-white
+                                  transition-all
+                                  hover:bg-red-400
+                                "
+                              >
+                                <Trash2 size={18} />
+                                Eliminar
+                              </button>
+                            )}
                           </>
                         )}
                       </div>
@@ -432,7 +601,7 @@ export default function ProgramasPage() {
       <Modal open={showCreateModal}>
         <div className="w-full max-w-[850px]">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2 className="text-2xl font-bold text-slate-800 sm:text-3xl">
               Nuevo Programa
             </h2>
 
@@ -441,7 +610,7 @@ export default function ProgramasPage() {
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <input
               type="text"
               placeholder="Código"
@@ -466,15 +635,20 @@ export default function ProgramasPage() {
               className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400"
             />
 
-            <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
+            <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400 md:col-span-2">
               <option>Estado</option>
               <option>Activo</option>
               <option>Inactivo</option>
             </select>
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+          <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowCreateModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -489,7 +663,7 @@ export default function ProgramasPage() {
       <Modal open={showEditModal}>
         <div className="w-full max-w-[850px]">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2 className="text-2xl font-bold text-slate-800 sm:text-3xl">
               Editar Programa
             </h2>
 
@@ -498,7 +672,7 @@ export default function ProgramasPage() {
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <input
               defaultValue="ING-SIS"
               className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400"
@@ -520,8 +694,13 @@ export default function ProgramasPage() {
             />
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+          <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowEditModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -536,7 +715,7 @@ export default function ProgramasPage() {
       <Modal open={showViewModal}>
         <div className="w-full max-w-[850px]">
           <div className="mb-8">
-            <h2 className="text-4xl font-bold text-slate-800">
+            <h2 className="text-3xl font-bold text-slate-800 sm:text-4xl">
               Ingeniería de Sistemas
             </h2>
 
@@ -545,13 +724,13 @@ export default function ProgramasPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <p className="text-slate-500">
                 Código
               </p>
 
-              <h3 className="mt-3 text-2xl font-bold text-slate-800">
+              <h3 className="mt-3 text-xl font-bold text-slate-800 sm:text-2xl">
                 ING-SIS
               </h3>
             </Card>
@@ -561,7 +740,7 @@ export default function ProgramasPage() {
                 Facultad
               </p>
 
-              <h3 className="mt-3 text-2xl font-bold text-slate-800">
+              <h3 className="mt-3 text-xl font-bold text-slate-800 sm:text-2xl">
                 Ingeniería
               </h3>
             </Card>
@@ -571,7 +750,7 @@ export default function ProgramasPage() {
                 Duración
               </p>
 
-              <h3 className="mt-3 text-2xl font-bold text-slate-800">
+              <h3 className="mt-3 text-xl font-bold text-slate-800 sm:text-2xl">
                 10 semestres
               </h3>
             </Card>
@@ -581,7 +760,7 @@ export default function ProgramasPage() {
                 Estudiantes
               </p>
 
-              <h3 className="mt-3 text-2xl font-bold text-slate-800">
+              <h3 className="mt-3 text-xl font-bold text-slate-800 sm:text-2xl">
                 420
               </h3>
             </Card>
@@ -598,7 +777,12 @@ export default function ProgramasPage() {
           </div>
 
           <div className="mt-8 flex justify-end">
-            <Button variant="outline" onClick={() => setShowViewModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowViewModal(false)
+              }
+            >
               Cerrar
             </Button>
           </div>

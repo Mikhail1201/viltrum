@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PageHeader from "@/components/layout/PageHeader";
@@ -33,14 +33,19 @@ import {
   - crear facultades
   - editar facultades
   - ver estadísticas
+  - acceso completo
 
   COORDINADOR:
-  - solo visualizar
+  - solo visualizar facultades
+  - NO puede crear
+  - NO puede editar
+  - NO ve estadísticas administrativas
 */
 
-const currentUserRole = "admin";
-
-const allowedRoles = ["admin", "coordinador"];
+const allowedRoles = [
+  "admin",
+  "coordinador",
+];
 
 const facultades = [
   {
@@ -51,6 +56,7 @@ const facultades = [
     materias: 48,
     estado: "Activo",
   },
+
   {
     id: 2,
     nombre: "Ciencias Económicas",
@@ -59,6 +65,7 @@ const facultades = [
     materias: 36,
     estado: "Activo",
   },
+
   {
     id: 3,
     nombre: "Derecho",
@@ -70,6 +77,8 @@ const facultades = [
 ];
 
 export default function FacultadesPage() {
+  const [role, setRole] = useState("");
+
   const [showCreateModal, setShowCreateModal] =
     useState(false);
 
@@ -79,22 +88,60 @@ export default function FacultadesPage() {
   const [showViewModal, setShowViewModal] =
     useState(false);
 
-  if (!allowedRoles.includes(currentUserRole)) {
+  useEffect(() => {
+    const savedRole =
+      localStorage.getItem("role");
+
+    if (savedRole) {
+      setRole(savedRole);
+    }
+  }, []);
+
+  if (
+    role &&
+    !allowedRoles.includes(role)
+  ) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
-        <div className="rounded-[32px] bg-white p-12 shadow-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff] p-6">
+        <div
+          className="
+            w-full
+            max-w-xl
+            rounded-[32px]
+            bg-white
+            p-8
+            shadow-2xl
+            sm:p-12
+          "
+        >
           <ShieldAlert
             className="mx-auto mb-6 text-red-500"
             size={60}
           />
 
-          <h1 className="text-center text-4xl font-bold text-slate-800">
+          <h1
+            className="
+              text-center
+              text-3xl
+              font-bold
+              text-slate-800
+              sm:text-4xl
+            "
+          >
             Acceso denegado
           </h1>
 
-          <p className="mt-4 text-center text-slate-500">
-            No tienes permisos para acceder a esta
-            página
+          <p
+            className="
+              mt-4
+              text-center
+              text-sm
+              text-slate-500
+              sm:text-base
+            "
+          >
+            No tienes permisos para acceder
+            a esta página
           </p>
         </div>
       </div>
@@ -108,74 +155,112 @@ export default function FacultadesPage() {
         title="Facultades"
         subtitle="Gestión y administración de facultades"
         actions={
-          currentUserRole === "admin" && (
+          role === "admin" && (
             <Button
               onClick={() =>
                 setShowCreateModal(true)
               }
             >
               <div className="flex items-center gap-2">
-                <Plus size={20} />
-                Nueva Facultad
+                <Plus size={18} />
+
+                <span className="text-sm sm:text-base">
+                  Nueva Facultad
+                </span>
               </div>
             </Button>
           )
         }
       />
 
-      {/* STATS */}
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card>
-          <div className="rounded-2xl bg-cyan-100 p-4 w-fit">
-            <Building2
-              className="text-cyan-600"
-              size={28}
-            />
-          </div>
+      {/* SOLO ADMIN VE ESTADÍSTICAS */}
+      {role === "admin" && (
+        <div
+          className="
+            mt-8
+            grid
+            grid-cols-1
+            gap-6
+            md:grid-cols-2
+            xl:grid-cols-3
+          "
+        >
+          <Card>
+            <div className="w-fit rounded-2xl bg-cyan-100 p-4">
+              <Building2
+                className="text-cyan-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-4xl font-bold text-slate-800">
-            12
-          </h2>
+            <h2
+              className="
+                mt-6
+                text-3xl
+                font-bold
+                text-slate-800
+                sm:text-4xl
+              "
+            >
+              12
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Facultades registradas
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Facultades registradas
+            </p>
+          </Card>
 
-        <Card>
-          <div className="rounded-2xl bg-emerald-100 p-4 w-fit">
-            <Users
-              className="text-emerald-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="w-fit rounded-2xl bg-emerald-100 p-4">
+              <Users
+                className="text-emerald-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-4xl font-bold text-slate-800">
-            4,280
-          </h2>
+            <h2
+              className="
+                mt-6
+                text-3xl
+                font-bold
+                text-slate-800
+                sm:text-4xl
+              "
+            >
+              4,280
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Estudiantes activos
-          </p>
-        </Card>
+            <p className="mt-2 text-slate-500">
+              Estudiantes activos
+            </p>
+          </Card>
 
-        <Card>
-          <div className="rounded-2xl bg-violet-100 p-4 w-fit">
-            <BookOpen
-              className="text-violet-600"
-              size={28}
-            />
-          </div>
+          <Card>
+            <div className="w-fit rounded-2xl bg-violet-100 p-4">
+              <BookOpen
+                className="text-violet-600"
+                size={28}
+              />
+            </div>
 
-          <h2 className="mt-6 text-4xl font-bold text-slate-800">
-            214
-          </h2>
+            <h2
+              className="
+                mt-6
+                text-3xl
+                font-bold
+                text-slate-800
+                sm:text-4xl
+              "
+            >
+              214
+            </h2>
 
-          <p className="mt-2 text-slate-500">
-            Materias disponibles
-          </p>
-        </Card>
-      </div>
+            <p className="mt-2 text-slate-500">
+              Materias disponibles
+            </p>
+          </Card>
+        </div>
+      )}
 
       {/* SEARCH */}
       <div className="mt-8">
@@ -183,7 +268,7 @@ export default function FacultadesPage() {
           <div className="flex items-center gap-4">
             <Search
               className="text-slate-400"
-              size={24}
+              size={22}
             />
 
             <input
@@ -192,10 +277,11 @@ export default function FacultadesPage() {
               className="
                 w-full
                 bg-transparent
-                text-lg
+                text-sm
                 text-slate-700
                 outline-none
                 placeholder:text-slate-400
+                sm:text-lg
               "
             />
           </div>
@@ -206,7 +292,16 @@ export default function FacultadesPage() {
       <div className="mt-8">
         <Card>
           {/* TITLE */}
-          <div className="mb-8 flex items-center gap-4">
+          <div
+            className="
+              mb-8
+              flex
+              flex-col
+              gap-4
+              sm:flex-row
+              sm:items-center
+            "
+          >
             <div className="rounded-2xl bg-cyan-100 p-4">
               <GraduationCap
                 className="text-cyan-600"
@@ -215,42 +310,57 @@ export default function FacultadesPage() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                  text-slate-800
+                  sm:text-3xl
+                "
+              >
                 Facultades registradas
               </h2>
 
               <p className="text-slate-500">
-                Información general de facultades
+                Información general de
+                facultades
               </p>
             </div>
           </div>
 
           {/* TABLE */}
-          <div className="overflow-hidden rounded-3xl border border-slate-100">
-            <table className="w-full">
+          <div
+            className="
+              overflow-x-auto
+              rounded-3xl
+              border
+              border-slate-100
+            "
+          >
+            <table className="min-w-[900px] w-full">
               <thead className="bg-cyan-50">
                 <tr>
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Facultad
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Director
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Estudiantes
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Materias
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Estado
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Acciones
                   </th>
                 </tr>
@@ -262,7 +372,7 @@ export default function FacultadesPage() {
                     key={facultad.id}
                     className="border-t border-slate-100"
                   >
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5 sm:px-6">
                       <div className="flex items-center gap-4">
                         <div className="rounded-2xl bg-cyan-100 p-3">
                           <GraduationCap
@@ -277,26 +387,28 @@ export default function FacultadesPage() {
                       </div>
                     </td>
 
-                    <td className="px-6 py-5 text-slate-600">
+                    <td className="px-4 py-5 text-slate-600 sm:px-6">
                       {facultad.director}
                     </td>
 
-                    <td className="px-6 py-5 text-slate-600">
-                      {facultad.estudiantes}
+                    <td className="px-4 py-5 text-slate-600 sm:px-6">
+                      {
+                        facultad.estudiantes
+                      }
                     </td>
 
-                    <td className="px-6 py-5 text-slate-600">
+                    <td className="px-4 py-5 text-slate-600 sm:px-6">
                       {facultad.materias}
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5 sm:px-6">
                       <StatusBadge
                         status={facultad.estado}
                       />
                     </td>
 
-                    <td className="px-6 py-5">
-                      <div className="flex gap-3">
+                    <td className="px-4 py-5 sm:px-6">
+                      <div className="flex flex-wrap gap-3">
                         {/* VER */}
                         <button
                           onClick={() =>
@@ -310,18 +422,18 @@ export default function FacultadesPage() {
                             bg-slate-100
                             px-4
                             py-3
+                            text-sm
                             text-slate-700
                             transition-all
                             hover:bg-slate-200
                           "
                         >
-                          <Eye size={18} />
+                          <Eye size={16} />
                           Ver
                         </button>
 
                         {/* SOLO ADMIN */}
-                        {currentUserRole ===
-                          "admin" && (
+                        {role === "admin" && (
                           <button
                             onClick={() =>
                               setShowEditModal(
@@ -336,12 +448,13 @@ export default function FacultadesPage() {
                               bg-cyan-500
                               px-4
                               py-3
+                              text-sm
                               text-white
                               transition-all
                               hover:bg-cyan-400
                             "
                           >
-                            <Pencil size={18} />
+                            <Pencil size={16} />
                             Editar
                           </button>
                         )}
@@ -357,9 +470,16 @@ export default function FacultadesPage() {
 
       {/* CREATE MODAL */}
       <Modal open={showCreateModal}>
-        <div className="w-[700px]">
+        <div className="w-full max-w-3xl">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2
+              className="
+                text-2xl
+                font-bold
+                text-slate-800
+                sm:text-3xl
+              "
+            >
               Crear Facultad
             </h2>
 
@@ -368,7 +488,14 @@ export default function FacultadesPage() {
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form
+            className="
+              grid
+              grid-cols-1
+              gap-5
+              md:grid-cols-2
+            "
+          >
             <input
               type="text"
               placeholder="Nombre de la facultad"
@@ -389,13 +516,29 @@ export default function FacultadesPage() {
 
             <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
               <option>Estado</option>
+
               <option>Activo</option>
+
               <option>Inactivo</option>
             </select>
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+          <div
+            className="
+              mt-8
+              flex
+              flex-col
+              gap-3
+              sm:flex-row
+              sm:justify-end
+            "
+          >
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowCreateModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -408,18 +551,33 @@ export default function FacultadesPage() {
 
       {/* EDIT MODAL */}
       <Modal open={showEditModal}>
-        <div className="w-[700px]">
+        <div className="w-full max-w-3xl">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2
+              className="
+                text-2xl
+                font-bold
+                text-slate-800
+                sm:text-3xl
+              "
+            >
               Editar Facultad
             </h2>
 
             <p className="mt-2 text-slate-500">
-              Modifica la información de la facultad
+              Modifica la información de la
+              facultad
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form
+            className="
+              grid
+              grid-cols-1
+              gap-5
+              md:grid-cols-2
+            "
+          >
             <input
               type="text"
               defaultValue="Ingeniería"
@@ -440,12 +598,27 @@ export default function FacultadesPage() {
 
             <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
               <option>Activo</option>
+
               <option>Inactivo</option>
             </select>
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+          <div
+            className="
+              mt-8
+              flex
+              flex-col
+              gap-3
+              sm:flex-row
+              sm:justify-end
+            "
+          >
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowEditModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -458,8 +631,17 @@ export default function FacultadesPage() {
 
       {/* VIEW MODAL */}
       <Modal open={showViewModal}>
-        <div className="w-[650px]">
-          <div className="mb-8 flex items-center gap-4">
+        <div className="w-full max-w-3xl">
+          <div
+            className="
+              mb-8
+              flex
+              flex-col
+              gap-4
+              sm:flex-row
+              sm:items-center
+            "
+          >
             <div className="rounded-3xl bg-cyan-100 p-5">
               <GraduationCap
                 className="text-cyan-600"
@@ -468,17 +650,32 @@ export default function FacultadesPage() {
             </div>
 
             <div>
-              <h2 className="text-4xl font-bold text-slate-800">
+              <h2
+                className="
+                  text-3xl
+                  font-bold
+                  text-slate-800
+                  sm:text-4xl
+                "
+              >
                 Ingeniería
               </h2>
 
               <p className="text-slate-500">
-                Información completa de la facultad
+                Información completa de la
+                facultad
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div
+            className="
+              grid
+              grid-cols-1
+              gap-6
+              md:grid-cols-2
+            "
+          >
             <Card>
               <p className="text-slate-500">
                 Director
@@ -520,7 +717,13 @@ export default function FacultadesPage() {
             </Card>
           </div>
 
-          <div className="mt-8 flex justify-end cursor-pointer">
+          <div
+            className="
+              mt-8
+              flex
+              justify-end
+            "
+          >
             <Button
               variant="outline"
               onClick={() =>

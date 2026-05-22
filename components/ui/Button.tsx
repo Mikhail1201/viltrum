@@ -11,16 +11,24 @@ export default function Button({
 }: Props) {
   const styles = {
     cyan: "bg-cyan-500 hover:bg-cyan-400 text-white",
-    emerald:
-      "bg-emerald-500 hover:bg-emerald-400 text-white",
-    outline:
-      "border border-slate-200 text-slate-600 bg-white",
+    emerald: "bg-emerald-500 hover:bg-emerald-400 text-white",
+    outline: "border border-slate-200 text-slate-600 bg-white",
   };
 
   return (
     <button
       onClick={onClick}
-      className={`rounded-2xl px-6 py-4 font-semibold transition-all ${styles[variant]}`}
+      className={`
+        rounded-xl sm:rounded-2xl
+        px-4 py-2.5
+        sm:px-5 sm:py-3
+        md:px-6 md:py-4
+        text-sm sm:text-base
+        font-semibold
+        transition-all
+        active:scale-95
+        ${styles[variant]}
+      `}
     >
       {children}
     </button>

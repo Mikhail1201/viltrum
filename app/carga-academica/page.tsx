@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PageHeader from "@/components/layout/PageHeader";
@@ -43,8 +43,6 @@ import {
   ESTUDIANTE:
   - no accede
 */
-
-const currentUserRole: "admin" | "coordinador" | "docente" = "admin";
 
 const allowedRoles = [
   "admin",
@@ -94,6 +92,11 @@ const cargas = [
 ];
 
 export default function CargaAcademicaPage() {
+  const [currentUserRole, setCurrentUserRole] =
+    useState("");
+
+  const [search, setSearch] = useState("");
+
   const [showCreateModal, setShowCreateModal] =
     useState(false);
 
@@ -103,22 +106,59 @@ export default function CargaAcademicaPage() {
   const [showViewModal, setShowViewModal] =
     useState(false);
 
-  if (!allowedRoles.includes(currentUserRole)) {
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+
+    if (role) {
+      setCurrentUserRole(role);
+    }
+  }, []);
+
+  const filteredCargas = useMemo(() => {
+    return cargas.filter((carga) => {
+      const query = search.toLowerCase();
+
+      return (
+        carga.programa
+          .toLowerCase()
+          .includes(query) ||
+        carga.materia
+          .toLowerCase()
+          .includes(query) ||
+        carga.docente
+          .toLowerCase()
+          .includes(query) ||
+        carga.aula.toLowerCase().includes(query)
+      );
+    });
+  }, [search]);
+
+  const canCreateOrEdit =
+    currentUserRole === "admin" ||
+    currentUserRole === "coordinador";
+
+  const canDelete =
+    currentUserRole === "admin";
+
+  if (
+    currentUserRole &&
+    !allowedRoles.includes(currentUserRole)
+  ) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
-        <div className="rounded-[32px] bg-white p-12 shadow-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff] px-6">
+        <div className="w-full max-w-xl rounded-[32px] bg-white p-10 shadow-2xl">
           <ShieldAlert
             className="mx-auto mb-6 text-red-500"
             size={60}
           />
 
-          <h1 className="text-center text-4xl font-bold text-slate-800">
+          <h1 className="text-center text-3xl font-bold text-slate-800 md:text-4xl">
             Acceso denegado
           </h1>
 
           <p className="mt-4 text-center text-slate-500">
-            No tienes permisos para acceder a esta
-            página
+            No tienes permisos para acceder a
+            esta página
           </p>
         </div>
       </div>
@@ -132,7 +172,7 @@ export default function CargaAcademicaPage() {
         title="Carga Académica"
         subtitle="Gestión de asignaciones académicas"
         actions={
-          currentUserRole !== "docente" && (
+          canCreateOrEdit && (
             <Button
               onClick={() =>
                 setShowCreateModal(true)
@@ -148,7 +188,16 @@ export default function CargaAcademicaPage() {
       />
 
       {/* STATS */}
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div
+        className="
+          mt-8
+          grid
+          grid-cols-1
+          gap-6
+          sm:grid-cols-2
+          xl:grid-cols-4
+        "
+      >
         <Card>
           <div className="w-fit rounded-2xl bg-cyan-100 p-4">
             <ClipboardList
@@ -157,7 +206,7 @@ export default function CargaAcademicaPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
             148
           </h2>
 
@@ -174,7 +223,7 @@ export default function CargaAcademicaPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
             42
           </h2>
 
@@ -191,7 +240,7 @@ export default function CargaAcademicaPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
             87
           </h2>
 
@@ -208,7 +257,7 @@ export default function CargaAcademicaPage() {
             />
           </div>
 
-          <h2 className="mt-6 text-5xl font-bold text-slate-800">
+          <h2 className="mt-6 text-4xl font-bold text-slate-800 md:text-5xl">
             36
           </h2>
 
@@ -221,8 +270,20 @@ export default function CargaAcademicaPage() {
       {/* SEARCH */}
       <div className="mt-8">
         <Card>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex flex-1 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex flex-col gap-4 xl:flex-row">
+            <div
+              className="
+                flex
+                flex-1
+                items-center
+                gap-4
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                p-4
+              "
+            >
               <Search
                 className="text-slate-400"
                 size={22}
@@ -231,6 +292,10 @@ export default function CargaAcademicaPage() {
               <input
                 type="text"
                 placeholder="Buscar carga académica..."
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
                 className="
                   w-full
                   bg-transparent
@@ -241,17 +306,58 @@ export default function CargaAcademicaPage() {
               />
             </div>
 
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Programa</option>
-            </select>
+            {canCreateOrEdit && (
+              <>
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>
+                    Programa
+                  </option>
+                </select>
 
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Docente</option>
-            </select>
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>
+                    Docente
+                  </option>
+                </select>
 
-            <select className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-700 outline-cyan-400">
-              <option>Día</option>
-            </select>
+                <select
+                  className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-5
+                    py-4
+                    text-slate-700
+                    outline-cyan-400
+                  "
+                >
+                  <option>Día</option>
+                </select>
+              </>
+            )}
           </div>
         </Card>
       </div>
@@ -259,7 +365,7 @@ export default function CargaAcademicaPage() {
       {/* TABLE */}
       <div className="mt-8">
         <Card>
-          <div className="mb-8 flex items-center gap-4">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center">
             <div className="rounded-2xl bg-cyan-100 p-4">
               <GraduationCap
                 className="text-cyan-600"
@@ -268,7 +374,7 @@ export default function CargaAcademicaPage() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-slate-800 md:text-3xl">
                 Cargas Académicas
               </h2>
 
@@ -278,7 +384,153 @@ export default function CargaAcademicaPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-100">
+          {/* MOBILE CARDS */}
+          <div className="grid gap-5 xl:hidden">
+            {filteredCargas.map((carga) => (
+              <div
+                key={carga.id}
+                className="
+                  rounded-3xl
+                  border
+                  border-slate-200
+                  bg-white
+                  p-6
+                "
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800">
+                      {carga.materia}
+                    </h3>
+
+                    <p className="mt-1 text-slate-500">
+                      {carga.programa}
+                    </p>
+                  </div>
+
+                  <StatusBadge
+                    status={carga.estado}
+                  />
+                </div>
+
+                <div className="mt-6 space-y-3 text-sm text-slate-600">
+                  <p>
+                    <span className="font-semibold">
+                      Docente:
+                    </span>{" "}
+                    {carga.docente}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">
+                      Aula:
+                    </span>{" "}
+                    {carga.aula}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">
+                      Grupo:
+                    </span>{" "}
+                    {carga.grupo}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">
+                      Horario:
+                    </span>{" "}
+                    {carga.dia} -{" "}
+                    {carga.hora}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">
+                      Periodo:
+                    </span>{" "}
+                    {carga.periodo}
+                  </p>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    onClick={() =>
+                      setShowViewModal(true)
+                    }
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-slate-100
+                      px-4
+                      py-3
+                      text-slate-700
+                      transition-all
+                      hover:bg-slate-200
+                    "
+                  >
+                    <Eye size={18} />
+                    Ver
+                  </button>
+
+                  {canCreateOrEdit && (
+                    <button
+                      onClick={() =>
+                        setShowEditModal(true)
+                      }
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-2xl
+                        bg-cyan-500
+                        px-4
+                        py-3
+                        text-white
+                        transition-all
+                        hover:bg-cyan-400
+                      "
+                    >
+                      <Pencil size={18} />
+                      Editar
+                    </button>
+                  )}
+
+                  {canDelete && (
+                    <button
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-2xl
+                        bg-red-500
+                        px-4
+                        py-3
+                        text-white
+                        transition-all
+                        hover:bg-red-400
+                      "
+                    >
+                      <Trash2 size={18} />
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* DESKTOP TABLE */}
+          <div
+            className="
+              hidden
+              overflow-x-auto
+              rounded-3xl
+              border
+              border-slate-100
+              xl:block
+            "
+          >
             <table className="w-full min-w-[1300px]">
               <thead className="bg-cyan-50">
                 <tr>
@@ -325,7 +577,7 @@ export default function CargaAcademicaPage() {
               </thead>
 
               <tbody className="bg-white/40">
-                {cargas.map((carga) => (
+                {filteredCargas.map((carga) => (
                   <tr
                     key={carga.id}
                     className="border-t border-slate-100"
@@ -370,7 +622,6 @@ export default function CargaAcademicaPage() {
 
                     <td className="px-6 py-5">
                       <div className="flex gap-3">
-                        {/* VER */}
                         <button
                           onClick={() =>
                             setShowViewModal(true)
@@ -392,9 +643,7 @@ export default function CargaAcademicaPage() {
                           Ver
                         </button>
 
-                        {/* EDITAR */}
-                        {currentUserRole !==
-                          "docente" && (
+                        {canCreateOrEdit && (
                           <button
                             onClick={() =>
                               setShowEditModal(
@@ -419,9 +668,7 @@ export default function CargaAcademicaPage() {
                           </button>
                         )}
 
-                        {/* ELIMINAR */}
-                        {currentUserRole ===
-                          "admin" && (
+                        {canDelete && (
                           <button
                             className="
                               flex
@@ -452,7 +699,7 @@ export default function CargaAcademicaPage() {
 
       {/* CREATE MODAL */}
       <Modal open={showCreateModal}>
-        <div className="max-w-[900px] w-full">
+        <div className="w-full max-w-[900px]">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-slate-800">
               Nueva Carga Académica
@@ -463,7 +710,7 @@ export default function CargaAcademicaPage() {
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <input
               type="text"
               placeholder="Programa"
@@ -515,8 +762,13 @@ export default function CargaAcademicaPage() {
             />
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+          <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowCreateModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -529,7 +781,7 @@ export default function CargaAcademicaPage() {
 
       {/* EDIT MODAL */}
       <Modal open={showEditModal}>
-        <div className="max-w-[900px] w-full">
+        <div className="w-full max-w-[900px]">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-slate-800">
               Editar Carga Académica
@@ -540,7 +792,7 @@ export default function CargaAcademicaPage() {
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <input
               defaultValue="Ingeniería de Sistemas"
               className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400"
@@ -572,8 +824,13 @@ export default function CargaAcademicaPage() {
             />
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+          <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowEditModal(false)
+              }
+            >
               Cancelar
             </Button>
 
@@ -586,9 +843,9 @@ export default function CargaAcademicaPage() {
 
       {/* VIEW MODAL */}
       <Modal open={showViewModal}>
-        <div className="max-w-[850px] w-full">
+        <div className="w-full max-w-[850px]">
           <div className="mb-8">
-            <h2 className="text-4xl font-bold text-slate-800">
+            <h2 className="text-3xl font-bold text-slate-800 md:text-4xl">
               Detalle de Carga
             </h2>
 
@@ -597,7 +854,7 @@ export default function CargaAcademicaPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <p className="text-slate-500">
                 Programa
@@ -660,7 +917,12 @@ export default function CargaAcademicaPage() {
           </div>
 
           <div className="mt-8 flex justify-end">
-            <Button variant="outline" onClick={() => setShowViewModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setShowViewModal(false)
+              }
+            >
               Cerrar
             </Button>
           </div>

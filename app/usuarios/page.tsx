@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PageHeader from "@/components/layout/PageHeader";
@@ -22,9 +22,26 @@ import {
   Plus,
 } from "lucide-react";
 
-const currentUserRole = "admin";
+/*
+  PERMISOS
 
-const allowedRoles = ["admin", "coordinador"];
+  ADMIN:
+  - puede crear usuarios
+  - editar usuarios
+  - importar excel
+  - ver TODOS los roles
+
+  COORDINADOR:
+  - puede crear docentes y estudiantes
+  - editar docentes y estudiantes
+  - importar excel
+  - NO administra admins
+*/
+
+const allowedRoles = [
+  "admin",
+  "coordinador",
+];
 
 const users = [
   {
@@ -35,6 +52,7 @@ const users = [
     rol: "Admin",
     estado: "Activo",
   },
+
   {
     id: 2,
     nombre: "Juan",
@@ -43,6 +61,7 @@ const users = [
     rol: "Docente",
     estado: "Inactivo",
   },
+
   {
     id: 3,
     nombre: "Laura",
@@ -54,27 +73,86 @@ const users = [
 ];
 
 export default function UsuariosPage() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showExcelModal, setShowExcelModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [role, setRole] = useState("");
 
-  if (!allowedRoles.includes(currentUserRole)) {
+  const [showCreateModal, setShowCreateModal] =
+    useState(false);
+
+  const [showExcelModal, setShowExcelModal] =
+    useState(false);
+
+  const [showEditModal, setShowEditModal] =
+    useState(false);
+
+  useEffect(() => {
+    const savedRole =
+      localStorage.getItem("role");
+
+    if (savedRole) {
+      setRole(savedRole);
+    }
+  }, []);
+
+  if (
+    role &&
+    !allowedRoles.includes(role)
+  ) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff]">
-        <div className="rounded-[32px] border border-red-100 bg-white p-12 shadow-xl">
-          <ShieldCheck className="mx-auto mb-6 text-red-500" size={60} />
+      <div className="flex min-h-screen items-center justify-center bg-[#eef4ff] p-6">
+        <div
+          className="
+            w-full
+            max-w-xl
+            rounded-[32px]
+            border
+            border-red-100
+            bg-white
+            p-8
+            shadow-xl
+            sm:p-12
+          "
+        >
+          <ShieldCheck
+            className="mx-auto mb-6 text-red-500"
+            size={60}
+          />
 
-          <h1 className="text-center text-4xl font-bold text-slate-800">
+          <h1
+            className="
+              text-center
+              text-3xl
+              font-bold
+              text-slate-800
+              sm:text-4xl
+            "
+          >
             Acceso denegado
           </h1>
 
-          <p className="mt-4 text-center text-slate-500">
-            No tienes permisos para acceder a esta página.
+          <p
+            className="
+              mt-4
+              text-center
+              text-sm
+              text-slate-500
+              sm:text-base
+            "
+          >
+            No tienes permisos para acceder
+            a esta página.
           </p>
         </div>
       </div>
     );
   }
+
+  // FILTRO SEGÚN ROL
+  const filteredUsers =
+    role === "coordinador"
+      ? users.filter(
+          (user) => user.rol !== "Admin"
+        )
+      : users;
 
   return (
     <DashboardLayout>
@@ -83,23 +161,42 @@ export default function UsuariosPage() {
         title="Gestión de Usuarios"
         subtitle="Administra los usuarios del sistema académico"
         actions={
-          <div className="flex gap-4">
+          <div
+            className="
+              flex
+              w-full
+              flex-col
+              gap-3
+              sm:w-auto
+              sm:flex-row
+            "
+          >
             <Button
               variant="emerald"
-              onClick={() => setShowExcelModal(true)}
+              onClick={() =>
+                setShowExcelModal(true)
+              }
             >
               <div className="flex items-center gap-2">
-                <Upload size={20} />
-                Importar Excel
+                <Upload size={18} />
+
+                <span className="text-sm sm:text-base">
+                  Importar Excel
+                </span>
               </div>
             </Button>
 
             <Button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() =>
+                setShowCreateModal(true)
+              }
             >
               <div className="flex items-center gap-2">
-                <Plus size={20} />
-                Nuevo Usuario
+                <Plus size={18} />
+
+                <span className="text-sm sm:text-base">
+                  Nuevo Usuario
+                </span>
               </div>
             </Button>
           </div>
@@ -110,7 +207,10 @@ export default function UsuariosPage() {
       <div className="mt-8">
         <Card>
           <div className="flex items-center gap-4">
-            <Search className="text-slate-400" size={24} />
+            <Search
+              className="text-slate-400"
+              size={22}
+            />
 
             <input
               type="text"
@@ -118,10 +218,11 @@ export default function UsuariosPage() {
               className="
                 w-full
                 bg-transparent
-                text-lg
+                text-sm
                 text-slate-700
                 outline-none
                 placeholder:text-slate-400
+                sm:text-lg
               "
             />
           </div>
@@ -132,78 +233,122 @@ export default function UsuariosPage() {
       <div className="mt-8">
         <Card>
           {/* TITLE */}
-          <div className="mb-8 flex items-center gap-4">
+          <div
+            className="
+              mb-8
+              flex
+              flex-col
+              gap-4
+              sm:flex-row
+              sm:items-center
+            "
+          >
             <div className="rounded-2xl bg-cyan-100 p-4">
-              <Users className="text-cyan-600" size={30} />
+              <Users
+                className="text-cyan-600"
+                size={28}
+              />
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                  text-slate-800
+                  sm:text-3xl
+                "
+              >
                 Usuarios registrados
               </h2>
 
-              <p className="text-slate-500">
+              <p
+                className="
+                  text-sm
+                  text-slate-500
+                  sm:text-base
+                "
+              >
                 Lista general de usuarios
               </p>
             </div>
           </div>
 
           {/* TABLE */}
-          <div className="overflow-hidden rounded-3xl border border-slate-100">
-            <table className="w-full">
+          <div
+            className="
+              overflow-x-auto
+              rounded-3xl
+              border
+              border-slate-100
+            "
+          >
+            <table className="min-w-[850px] w-full">
               <thead className="bg-cyan-50">
                 <tr>
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Nombre
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Correo
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Rol
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Estado
                   </th>
 
-                  <th className="px-6 py-5 text-left text-slate-700">
+                  <th className="px-4 py-5 text-left text-sm text-slate-700 sm:px-6">
                     Acciones
                   </th>
                 </tr>
               </thead>
 
               <tbody className="bg-white/30">
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr
                     key={user.id}
                     className="border-t border-slate-100"
                   >
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5 sm:px-6">
                       <p className="font-semibold text-slate-800">
-                        {user.nombre} {user.apellido}
+                        {user.nombre}{" "}
+                        {user.apellido}
                       </p>
                     </td>
 
-                    <td className="px-6 py-5 text-slate-600">
+                    <td className="px-4 py-5 text-sm text-slate-600 sm:px-6">
                       {user.correo}
                     </td>
 
-                    <td className="px-6 py-5">
-                      <span className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-medium text-cyan-600">
+                    <td className="px-4 py-5 sm:px-6">
+                      <span
+                        className="
+                          rounded-full
+                          bg-cyan-100
+                          px-4
+                          py-2
+                          text-xs
+                          font-medium
+                          text-cyan-600
+                          sm:text-sm
+                        "
+                      >
                         {user.rol}
                       </span>
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5 sm:px-6">
                       <StatusBadge
                         status={user.estado}
                       />
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-5 sm:px-6">
                       <button
                         onClick={() =>
                           setShowEditModal(true)
@@ -216,12 +361,13 @@ export default function UsuariosPage() {
                           bg-cyan-500
                           px-4
                           py-3
+                          text-sm
                           text-white
                           transition-all
                           hover:bg-cyan-400
                         "
                       >
-                        <Pencil size={18} />
+                        <Pencil size={16} />
                         Editar
                       </button>
                     </td>
@@ -235,17 +381,33 @@ export default function UsuariosPage() {
 
       {/* CREATE MODAL */}
       <Modal open={showCreateModal}>
-        <div className="w-full max-w-3xl">
-          <div className="mb-8 flex items-center gap-4">
+        <div className="w-full max-w-4xl">
+          <div
+            className="
+              mb-8
+              flex
+              flex-col
+              gap-4
+              sm:flex-row
+              sm:items-center
+            "
+          >
             <div className="rounded-2xl bg-cyan-100 p-4">
               <UserCog
                 className="text-cyan-600"
-                size={30}
+                size={28}
               />
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                  text-slate-800
+                  sm:text-3xl
+                "
+              >
                 Crear Usuario
               </h2>
 
@@ -255,7 +417,14 @@ export default function UsuariosPage() {
             </div>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form
+            className="
+              grid
+              grid-cols-1
+              gap-5
+              md:grid-cols-2
+            "
+          >
             <input
               type="text"
               placeholder="Nombre"
@@ -280,13 +449,28 @@ export default function UsuariosPage() {
               className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400"
             />
 
-            <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
-              <option>Seleccionar Rol</option>
-              <option>Admin</option>
-              <option>Coordinador</option>
-              <option>Docente</option>
-              <option>Estudiante</option>
-            </select>
+            {/* ADMIN PUEDE CREAR TODO */}
+            {role === "admin" ? (
+              <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
+                <option>
+                  Seleccionar Rol
+                </option>
+
+                <option>Admin</option>
+                <option>Coordinador</option>
+                <option>Docente</option>
+                <option>Estudiante</option>
+              </select>
+            ) : (
+              <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
+                <option>
+                  Seleccionar Rol
+                </option>
+
+                <option>Docente</option>
+                <option>Estudiante</option>
+              </select>
+            )}
 
             <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
               <option>Estado</option>
@@ -296,7 +480,16 @@ export default function UsuariosPage() {
             </select>
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
+          <div
+            className="
+              mt-8
+              flex
+              flex-col
+              gap-3
+              sm:flex-row
+              sm:justify-end
+            "
+          >
             <Button
               variant="outline"
               onClick={() =>
@@ -315,17 +508,33 @@ export default function UsuariosPage() {
 
       {/* EXCEL MODAL */}
       <Modal open={showExcelModal}>
-        <div className="w-full max-w-2xl">
-          <div className="mb-8 flex items-center gap-4">
+        <div className="w-full max-w-3xl">
+          <div
+            className="
+              mb-8
+              flex
+              flex-col
+              gap-4
+              sm:flex-row
+              sm:items-center
+            "
+          >
             <div className="rounded-2xl bg-emerald-100 p-4">
               <Upload
                 className="text-emerald-600"
-                size={30}
+                size={28}
               />
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-800">
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                  text-slate-800
+                  sm:text-3xl
+                "
+              >
                 Importar Usuarios
               </h2>
 
@@ -335,13 +544,31 @@ export default function UsuariosPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border-2 border-dashed border-emerald-200 bg-emerald-50 p-12 text-center">
+          <div
+            className="
+              rounded-3xl
+              border-2
+              border-dashed
+              border-emerald-200
+              bg-emerald-50
+              p-8
+              text-center
+              sm:p-12
+            "
+          >
             <Upload
               className="mx-auto mb-6 text-emerald-500"
               size={50}
             />
 
-            <h3 className="text-2xl font-bold text-slate-700">
+            <h3
+              className="
+                text-xl
+                font-bold
+                text-slate-700
+                sm:text-2xl
+              "
+            >
               Selecciona un archivo Excel
             </h3>
 
@@ -349,12 +576,35 @@ export default function UsuariosPage() {
               Formatos permitidos: .xlsx .xls
             </p>
 
-            <button className="mt-8 rounded-2xl bg-emerald-500 px-6 py-4 font-semibold text-white transition-all hover:bg-emerald-400">
+            <button
+              className="
+                mt-8
+                rounded-2xl
+                bg-emerald-500
+                px-6
+                py-4
+                text-sm
+                font-semibold
+                text-white
+                transition-all
+                hover:bg-emerald-400
+                sm:text-base
+              "
+            >
               Seleccionar archivo
             </button>
           </div>
 
-          <div className="mt-8 flex justify-end gap-4">
+          <div
+            className="
+              mt-8
+              flex
+              flex-col
+              gap-3
+              sm:flex-row
+              sm:justify-end
+            "
+          >
             <Button
               variant="outline"
               onClick={() =>
@@ -373,18 +623,33 @@ export default function UsuariosPage() {
 
       {/* EDIT MODAL */}
       <Modal open={showEditModal}>
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-3xl">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800">
+            <h2
+              className="
+                text-2xl
+                font-bold
+                text-slate-800
+                sm:text-3xl
+              "
+            >
               Editar Usuario
             </h2>
 
             <p className="mt-2 text-slate-500">
-              Modifica la información del usuario
+              Modifica la información del
+              usuario
             </p>
           </div>
 
-          <form className="grid grid-cols-2 gap-6">
+          <form
+            className="
+              grid
+              grid-cols-1
+              gap-5
+              md:grid-cols-2
+            "
+          >
             <input
               type="text"
               defaultValue="Miguel"
@@ -403,12 +668,19 @@ export default function UsuariosPage() {
               className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400"
             />
 
-            <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
-              <option>Admin</option>
-              <option>Coordinador</option>
-              <option>Docente</option>
-              <option>Estudiante</option>
-            </select>
+            {role === "admin" ? (
+              <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
+                <option>Admin</option>
+                <option>Coordinador</option>
+                <option>Docente</option>
+                <option>Estudiante</option>
+              </select>
+            ) : (
+              <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
+                <option>Docente</option>
+                <option>Estudiante</option>
+              </select>
+            )}
 
             <select className="rounded-2xl border border-slate-200 p-4 text-slate-700 outline-cyan-400">
               <option>Activo</option>
@@ -417,7 +689,16 @@ export default function UsuariosPage() {
             </select>
           </form>
 
-          <div className="mt-8 flex justify-end gap-4">
+          <div
+            className="
+              mt-8
+              flex
+              flex-col
+              gap-3
+              sm:flex-row
+              sm:justify-end
+            "
+          >
             <Button
               variant="outline"
               onClick={() =>
